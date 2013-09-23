@@ -463,7 +463,6 @@ func (me *Connection) call(req message, res ...message) error {
 		return ErrCommandInvalid
 	}
 
-	panic("unreachable")
 }
 
 //    Connection          = open-Connection *use-Connection close-Connection
@@ -585,5 +584,5 @@ func pick(client, server int) int {
 			return client
 		}
 	}
-	panic("unreachable")
+
 }

@@ -1384,7 +1384,7 @@ func assertConsumeBody(t *testing.T, messages <-chan Delivery, body []byte) *Del
 		t.Fatalf("Timeout waiting for %s", body)
 		return nil
 	}
-	panic("unreachable")
+
 }
 
 // Pulls out the CRC and verifies the remaining content against the CRC

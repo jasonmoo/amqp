@@ -122,7 +122,6 @@ func (t *server) recv(channel int, m message) message {
 		}
 	}
 
-	panic("unreachable")
 }
 
 func (t *server) expectAMQP() {

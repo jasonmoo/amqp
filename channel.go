@@ -319,7 +319,6 @@ func (me *Channel) recvMethod(f frame) error {
 		return me.transition((*Channel).recvMethod)
 	}
 
-	panic("unreachable")
 }
 
 func (me *Channel) recvHeader(f frame) error {
@@ -345,7 +344,6 @@ func (me *Channel) recvHeader(f frame) error {
 		return me.transition((*Channel).recvMethod)
 	}
 
-	panic("unreachable")
 }
 
 // state after method + header and before the length
@@ -372,7 +370,6 @@ func (me *Channel) recvContent(f frame) error {
 		return me.transition((*Channel).recvContent)
 	}
 
-	panic("unreachable")
 }
 
 /*
@@ -732,7 +729,6 @@ func (me *Channel) QueueDeclare(name string, durable, autoDelete, exclusive, noW
 		}, nil
 	}
 
-	panic("unreachable")
 }
 
 /*
