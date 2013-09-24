@@ -518,7 +518,7 @@ func export(delim *regexp.Regexp, parts ...string) (res string) {
 			case 2:
 				return strings.ToUpper(match[1:])
 			}
-
+			return ""
 		})
 	}
 
