@@ -14,6 +14,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"text/template"
 )
@@ -134,9 +135,10 @@ type fieldset struct {
 
 var (
 	helpers = template.FuncMap{
-		"public":  public,
-		"private": private,
-		"clean":   clean,
+		"public":                    public,
+		"private":                   private,
+		"clean":                     clean,
+		"join_soft_exception_codes": join_soft_exception_codes,
 	}
 
 	packageTemplate = template.Must(template.New("package").Funcs(helpers).Parse(`
@@ -168,8 +170,8 @@ var (
 
 	func isSoftExceptionCode(code int) bool {
 		switch code {
-		{{range $c := .Constants}} {{if $c.IsSoftError}} case {{$c.Value}}:
-		{{end}}{{end}}return true
+		case {{join_soft_exception_codes .Constants}}:
+			return true
 		}
 		return false
 	}
@@ -494,6 +496,16 @@ func private(parts ...string) string {
 
 func public(parts ...string) string {
 	return export(regexp.MustCompile(`^\w|[-_]\w`), parts...)
+}
+
+func join_soft_exception_codes(list []Constant) string {
+	var ids string
+	for _, c := range list {
+		if c.IsSoftError() {
+			ids += strconv.Itoa(c.Value) + ","
+		}
+	}
+	return ids[:len(ids)-1]
 }
 
 func export(delim *regexp.Regexp, parts ...string) (res string) {

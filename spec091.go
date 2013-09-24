@@ -48,13 +48,7 @@ const (
 
 func isSoftExceptionCode(code int) bool {
 	switch code {
-	case 311:
-	case 312:
-	case 313:
-	case 403:
-	case 404:
-	case 405:
-	case 406:
+	case 311, 312, 313, 403, 404, 405, 406:
 		return true
 	}
 	return false
