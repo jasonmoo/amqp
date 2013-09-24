@@ -7,6 +7,7 @@ package amqp
 
 import (
 	"container/heap"
+	"errors"
 	"reflect"
 	"sync"
 )
@@ -317,6 +318,8 @@ func (me *Channel) recvMethod(f frame) error {
 	case *bodyFrame:
 		// drop
 		return me.transition((*Channel).recvMethod)
+	default:
+		return errors.New("Unsupported frame type")
 	}
 
 }
@@ -342,6 +345,8 @@ func (me *Channel) recvHeader(f frame) error {
 	case *bodyFrame:
 		// drop and reset
 		return me.transition((*Channel).recvMethod)
+	default:
+		return errors.New("Unsupported frame type")
 	}
 
 }
@@ -368,6 +373,8 @@ func (me *Channel) recvContent(f frame) error {
 		}
 
 		return me.transition((*Channel).recvContent)
+	default:
+		return errors.New("Unsupported frame type")
 	}
 
 }
