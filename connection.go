@@ -46,7 +46,7 @@ type Connection struct {
 
 	rpc       chan message
 	writer    *writer
-	sends     chan time.Time     // timestamps of each frame sent
+	sends     chan struct{}      // reports a frame sent
 	deadlines chan readDeadliner // heartbeater updates read deadlines
 
 	channels channelRegistry
@@ -147,7 +147,7 @@ func Open(conn io.ReadWriteCloser, config Config) (*Connection, error) {
 		writer:    &writer{bufio.NewWriter(conn)},
 		channels:  channelRegistry{channels: make(map[uint16]*Channel)},
 		rpc:       make(chan message),
-		sends:     make(chan time.Time),
+		sends:     make(chan struct{}, 1),
 		errors:    make(chan *Error, 1),
 		deadlines: make(chan readDeadliner, 1),
 	}
@@ -229,7 +229,7 @@ func (me *Connection) send(f frame) error {
 		// if there is something that can receive - like a non-reentrant
 		// call or if the heartbeater isn't running
 		select {
-		case me.sends <- time.Now():
+		case me.sends <- struct{}{}:
 		default:
 		}
 	}
@@ -370,21 +370,24 @@ func (me *Connection) heartbeater(interval time.Duration, done chan *Error) {
 		sendTicks = time.Tick(interval)
 	}
 
-	lastSent := time.Now()
+	var frameSent bool
 
 	for {
 		select {
-		case at, stillSending := <-me.sends:
-			// When actively sending, depend on sent frames to reset server timer
+		case _, stillSending := <-me.sends:
+			// When actively sending, track any sends to avoid excessive heartbeats
 			if stillSending {
-				lastSent = at
+				frameSent = true
 			} else {
 				return
 			}
 
-		case at := <-sendTicks:
-			// When idle, fill the space with a heartbeat frame
-			if at.Sub(lastSent) > interval-time.Second {
+		case _ = <-sendTicks:
+			if frameSent {
+				// reset if there were frames sent
+				frameSent = false
+			} else {
+				// only send a heartbeat if zero frames sent since last tick
 				if err := me.send(&heartbeatFrame{}); err != nil {
 					// send heartbeats even after close/closeOk so we
 					// tick until the connection starts erroring
